@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "call-vm-mcp"
+version = "0.1.0"
+description = "Local VMware Workstation MCP tools with an explicit machine inventory"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["mcp==1.13.0", "pydantic==2.11.7", "pydantic-settings==2.10.1"]
+
+[project.scripts]
+call-vm-mcp = "call_vm_mcp.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["call_vm_mcp*"]

@@ -1,0 +1,10 @@
+{
+  "vmrun": "C:\\Program Files (x86)\\VMware\\VMware Workstation\\vmrun.exe",
+  "vms": {
+    "kali": {
+      "label": "Kali Linux",
+      "os": "linux",
+      "path": "D:\\VMs\\Kali\\Kali.vmx"
+    }
+  }
+}

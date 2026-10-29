@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "vmware_lab": {
+      "type": "local",
+      "command": [
+        "C:\\Tools\\Call-VM-MCP\\.venv\\Scripts\\python.exe",
+        "C:\\Tools\\Call-VM-MCP\\serve.py"
+      ],
+      "enabled": true,
+      "timeout": 120000
+    }
+  }
+}

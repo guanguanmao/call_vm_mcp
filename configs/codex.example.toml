@@ -1,0 +1,3 @@
+[mcp_servers.call_vm_mcp]
+command = "C:\\Tools\\Call-VM-MCP\\.venv\\Scripts\\python.exe"
+args = ["C:\\Tools\\Call-VM-MCP\\serve.py"]
