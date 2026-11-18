@@ -1,21 +1,23 @@
 # Call VM MCP
 
-用于 Windows VMware Workstation 的本地 MCP 服务。通过 stdio 接入 OpenCode、Codex 或其他 MCP 客户端，操作自己登记的虚拟机。
+**English** | [简体中文](README.zh-CN.md)
 
-## 安装
+A local MCP server for VMware Workstation on Windows. Connect OpenCode, Codex, or another MCP client over stdio to operate virtual machines you have explicitly registered.
 
-需要 Windows、VMware Workstation、Python 3.11 或以上，以及已有的 `.vmx` 文件。以下安装位置均为示例，请替换为自己的路径。
+## Installation
+
+Requires Windows, VMware Workstation, Python 3.11 or later, and existing `.vmx` files. All installation paths below are examples; replace them with your own.
 
 ```powershell
 Set-Location 'C:\Tools\Call-VM-MCP'
 .\scripts\install.ps1 -Python python
 ```
 
-安装器建立独立 `.venv`、安装锁定依赖，并在缺少本机登记表时复制示例；不会覆盖已有登记表。离线安装可追加 `-WheelDirectory 'D:\Wheels'`。
+The installer creates an isolated `.venv`, installs pinned dependencies, and copies the example inventory if a local inventory does not already exist. It does not overwrite an existing inventory. For offline installation, add `-WheelDirectory 'D:\Wheels'`.
 
-## 登记虚拟机
+## Register virtual machines
 
-编辑安装目录下的 `config.local.json`，填写本机 vmrun 与 VMX 的绝对路径。JSON 中反斜杠写为 `\\`。
+Edit `config.local.json` in the installation directory. Enter absolute paths to vmrun and your VMX files. Escape backslashes as `\\` in JSON.
 
 ```json
 {
@@ -30,11 +32,11 @@ Set-Location 'C:\Tools\Call-VM-MCP'
 }
 ```
 
-可在 `vms` 中继续添加机器。ID 以小写字母开头，只包含小写字母、数字或下划线，最多 32 个字符；`os` 为 `linux` 或 `windows`。登记表不保存密码。新增或修改机器后重新加载 MCP，不会自动发现或热更新。
+Add more machines under `vms` as needed. IDs must start with a lowercase letter, contain only lowercase letters, digits, or underscores, and be at most 32 characters long. Set `os` to `linux` or `windows`. The inventory does not store passwords. Reload the MCP server after adding or editing machines; automatic discovery and live configuration reloads are not supported.
 
-## 接入客户端
+## Connect a client
 
-OpenCode：将以下 `mcp` 配置合并到项目 `opencode.json`。项目级启用可以减少其他项目加载的工具。
+For OpenCode, merge the following `mcp` configuration into your project's `opencode.json`. Enabling the server at project level keeps the tools scoped to the projects that need them.
 
 ```json
 {
@@ -52,43 +54,43 @@ OpenCode：将以下 `mcp` 配置合并到项目 `opencode.json`。项目级启�
 }
 ```
 
-替换两处安装路径，重新加载客户端，再运行 `opencode mcp list` 检查连接。不要重复注册同一个服务。
+Replace both installation paths, reload the client, and run `opencode mcp list` to check the connection. Do not register the same server more than once.
 
-其他客户端可参考 `configs/mcp-servers.json`，Codex 可参考 `configs/codex.example.toml`。模板不会自动修改客户端设置。命令使用本服务的独立 Python；如需其他登记表，在入口参数后追加 `--config` 和 JSON 的绝对路径。
+For other clients, see [configs/mcp-servers.json](configs/mcp-servers.json). For Codex, see [configs/codex.example.toml](configs/codex.example.toml). These templates do not modify client settings automatically. Launch the server with its dedicated Python interpreter. To use a different inventory, append `--config` and the JSON file's absolute path to the launcher arguments.
 
-## 使用
+## Usage
 
-| 工具  | 功能  |
+| Tool | Function |
 | --- | --- |
-| `vmware_list()` | 返回登记机器的 ID、名称、系统类型、VMX 路径、文件存在与运行状态 |
-| `vmware_start(vm_id, wait_seconds=90, gui=false)` | 启动一台机器；`gui=true` 显示 VMware 窗口，已运行时不重复启动 |
-| `vmware_shutdown(vm_id)` | 请求正常关机，需要 VMware Tools；失败时不会自动强制断电 |
-| `linux_run(vm_id, command, working_directory=null, timeout_seconds=60)` | 在已运行的 Linux 客体执行 Bash 命令，返回输出 |
+| `vmware_list()` | Return registered VM IDs, labels, OS types, VMX paths, file availability, and running state. |
+| `vmware_start(vm_id, wait_seconds=90, gui=false)` | Start a VM; `gui=true` shows its VMware window. An already running VM is not started again. |
+| `vmware_shutdown(vm_id)` | Request a normal shutdown using VMware Tools. Failure does not trigger a forced power-off. |
+| `linux_run(vm_id, command, working_directory=null, timeout_seconds=60)` | Execute a Bash command in a running Linux guest and return its output. |
 
-例如，在客户端提出：“列出虚拟机，启动 kali 并显示窗口。”不需要启动的机器不会在服务初始化时自动开机。`running=true` 只表示 VMware 已启动机器，不保证客体已经就绪。
+For example, ask your client: “List my virtual machines, then start kali and show its window.” The server does not start machines automatically during initialization. A `running=true` result only means VMware has started the VM; it does not guarantee that the guest is ready.
 
-Windows 客体目前支持列表和电源操作，不支持客体命令。默认只注册四个工具。
+Windows guests currently support listing and power operations, but not guest command execution. Four tools are registered by default.
 
-## 客体登录凭据
+## Guest credentials
 
-列表和启动不需要密码。Linux 客体命令需要 VMware Tools / open-vm-tools，以及该虚拟机内部的登录账号。
+Listing and starting VMs do not require a password. Linux guest commands require VMware Tools / open-vm-tools and a login account inside that VM.
 
-在本机交互式终端执行：
+Run the following in an interactive terminal on the host:
 
 ```powershell
 & .\.venv\Scripts\python.exe .\serve.py credentials kali
 ```
 
-输入客体用户名和密码，密码不回显，保存到当前 Windows 用户的凭据管理器，名称为 `VMwareLab/kali`。其他机器将 `kali` 替换为其登记 ID；更换电脑或 Windows 用户后重新设置。不要将密码放进聊天、登记表或客户端配置。
+Enter the guest username and password. The password is not echoed. Credentials are saved in the current Windows user's Credential Manager under `VMwareLab/kali`. Replace `kali` with another registered VM ID as needed. Set credentials again after changing computers or Windows users. Do not put passwords in chat, inventories, or client configuration.
 
-客体启动且 Tools 就绪后，可调用 `linux_run` 执行 `uname -s; id -un; pwd`，工作目录设为 `/tmp`，测试返回结果。客体命令功能尚待完成端到端验收。
+Once the guest is running and Tools is ready, try `linux_run` with the command `uname -s; id -un; pwd` and the working directory `/tmp` to check the returned result. Guest command execution still requires end-to-end acceptance testing.
 
-## 运行说明
+## Operational notes
 
-- 每个客户端启动独立 stdio 子进程，不监听 HTTP 端口、不后台轮询，日常运行通过本机 vmrun 完成。
-- 多个客户端不要同时对同一虚拟机发出相反启停操作；当前没有操作锁。
-- 客体命令按客体账号权限执行。超时只限制宿主等待，不保证终止客体进程。
-- 命令输出先存入客体 `/tmp` 日志，宿主临时副本读取后删除；客体日志可自行清理。vmrun 使用的密码会作为本机进程参数传入。
-- 虚拟机路径和命令输出会返回给客户端；客户端使用云端模型时，这些结果可能进入模型请求。
-- `exists=false` 时检查 VMX 路径；凭据缺失时运行上述凭据命令；正常关机失败时检查 Tools。
-- 本机登记表、虚拟环境和密码不属于分享内容。重新分享前检查包内容；`.gitignore` 不约束普通 ZIP 打包，也不会移除已跟踪文件。
+- Each client starts its own stdio subprocess. The server does not listen on an HTTP port or poll in the background; normal operation uses the local vmrun executable.
+- Avoid issuing conflicting start and shutdown requests for the same VM from multiple clients. There is currently no operation lock.
+- Guest commands run with the guest account's permissions. A timeout only limits how long the host waits; it does not guarantee termination of guest processes.
+- Command output is first written to a log in the guest's `/tmp` directory. The host's temporary copy is deleted after reading; guest logs can be cleaned up separately. vmrun receives the password as a host process argument.
+- VM paths and command output are returned to the client. If the client uses a cloud model, these results may be included in model requests.
+- If `exists=false`, check the VMX path. If credentials are missing, run the credentials command above. If normal shutdown fails, check Tools.
+- Local inventories, virtual environments, and passwords are not part of the files to share. Review package contents before sharing. `.gitignore` does not apply to arbitrary ZIP exports and does not remove files already tracked by Git.
